@@ -1,102 +1,107 @@
-import Image from "next/image";
+/** @format */
+"use client";
+import React, { useState } from "react";
+import Link from "next/link";
+import { GithubIcon } from "lucide-react";
+import { Octokit } from "@octokit/core";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const octokit = new Octokit();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const [username, setUsername] = useState<string>("");
+
+  const handleAnalyze = async () => {
+    if (username) {
+      console.log(username);
+      try {
+        const response = await octokit.request(`GET /users/${username}`, {
+          username: username,
+          headers: {
+            "X-GitHub-Api-Version": "2022-11-28",
+          },
+        });
+        console.log(response);
+      } catch (err) {
+        console.log("Username not found.");
+        alert(
+          "Could you please check the username. did you spell it wrong or what?"
+        );
+      }
+    } else {
+      alert("Enter your github username first :(");
+    }
+  };
+  return (
+    <div className="flex min-h-screen flex-col">
+      <header className="border-b">
+        <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
+          <Link href="/" className="flex items-center gap-2 font-semibold">
+            <GithubIcon className="h-5 w-5" />
+            <span>GitHub Analytics</span>
+          </Link>
+          <nav className="ml-auto flex gap-4">
+            <Link href="#" className="text-sm font-medium hover:underline">
+              About
+            </Link>
+            <Link href="#" className="text-sm font-medium hover:underline">
+              Features
+            </Link>
+          </nav>
         </div>
+      </header>
+      <main className="flex-1">
+        <section className="container grid items-center gap-6 py-20 md:py-32">
+          <div className="mx-auto flex max-w-[800px] flex-col items-center gap-4 text-center">
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+              Analyze GitHub Profiles
+            </h1>
+            <p className="max-w-[600px] text-muted-foreground md:text-xl">
+              Enter a GitHub username to view detailed analytics and insights
+              about their repositories and activity.
+            </p>
+          </div>
+          <div className="mx-auto w-full max-w-md space-y-4">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="github-username" className="text-sm font-medium">
+                GitHub Username
+              </label>
+              <Input
+                id="github-username"
+                placeholder="Enter GitHub username"
+                className="w-full"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
+            <Button className="w-full" onClick={handleAnalyze}>
+              View Analytics
+            </Button>
+          </div>
+        </section>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      <footer className="border-t py-6">
+        <div className="container flex flex-col items-center justify-between gap-4 px-4 text-center md:flex-row md:text-left">
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} GitHub Analytics. All rights reserved.
+          </p>
+          <nav className="flex gap-4">
+            <Link
+              href="#"
+              className="text-sm text-muted-foreground hover:underline"
+            >
+              Privacy
+            </Link>
+            <Link
+              href="#"
+              className="text-sm text-muted-foreground hover:underline"
+            >
+              Terms
+            </Link>
+          </nav>
+        </div>
       </footer>
     </div>
   );
