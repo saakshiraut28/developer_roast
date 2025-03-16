@@ -13,27 +13,48 @@ export default function Home() {
 
   const [username, setUsername] = useState<string>("");
 
+  const [roast, setRoast] = useState<string | null>(null);
+
   const handleAnalyze = async () => {
-    if (username) {
-      console.log(username);
-      try {
-        const response = await octokit.request(`GET /users/${username}`, {
-          username: username,
-          headers: {
-            "X-GitHub-Api-Version": "2022-11-28",
-          },
-        });
-        console.log(response);
-      } catch (err) {
-        console.log("Username not found.");
-        alert(
-          "Could you please check the username. did you spell it wrong or what?"
-        );
+    if (!username) {
+      alert("Enter your GitHub username first :(");
+      return;
+    }
+
+    try {
+      // Fetch user profile
+      const { data: profile } = await octokit.request(`GET /users/${username}`);
+      // Fetch repos
+      const { data: repos } = await octokit.request(
+        `GET /users/${username}/repos`,
+        {
+          per_page: 5,
+        }
+      );
+
+      console.log("GitHub Data:", profile, repos);
+
+      // Call the backend API
+      const response = await fetch("/pages/api/roast", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, profile, repos }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setRoast(data.roast);
+      } else {
+        throw new Error(data.error || "Failed to fetch roast");
       }
-    } else {
-      alert("Enter your github username first :(");
+    } catch (err) {
+      console.error("Error:", err);
+      alert("Couldn't fetch GitHub data. Did you spell it wrong?");
     }
   };
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-b">
@@ -82,6 +103,12 @@ export default function Home() {
           </div>
         </section>
       </main>
+      {roast && (
+        <div className="mt-6 p-4 bg-gray-900 text-white rounded-lg text-center shadow-lg">
+          <h2 className="text-xl font-bold">🔥 Brutal Roast 🔥</h2>
+          <p className="mt-2 italic">{roast}</p>
+        </div>
+      )}
       <footer className="border-t py-6">
         <div className="container flex flex-col items-center justify-between gap-4 px-4 text-center md:flex-row md:text-left">
           <p className="text-sm text-muted-foreground">
